@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Table</title>
+        <style>
+            :root {
+                --table-background: #fff8ea;
+                --table-border: #111111;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                margin: 0;
+                min-height: 100%;
+            }
+
+            body {
+                background: var(--table-background);
+                color: #111111;
+                font-family: Arial, sans-serif;
+            }
+
+            #table-container {
+                width: 100%;
+                overflow: auto;
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                table-layout: fixed;
+            }
+
+            .data-table th,
+            .data-table td {
+                min-width: 90px;
+                height: 51px;
+                padding: 10px 12px;
+                border: 1px solid var(--table-border);
+                font-size: 16px;
+                font-weight: 400;
+                text-align: center;
+                vertical-align: middle;
+                overflow-wrap: anywhere;
+            }
+
+            .data-table th {
+                background: #fffaf0;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="table-container"></div>
+        <script src="table.js"></script>
+        <script src="example.js"></script>
+    </body>
+</html>
