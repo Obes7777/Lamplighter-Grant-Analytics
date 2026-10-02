@@ -2,6 +2,8 @@
 
 `CsvTable` is a dependency-free JavaScript class for displaying CSV data in an HTML table. It supports CSV strings, browser `File` objects, and CSV URLs.
 
+Excel support uses SheetJS from a browser script tag. No npm installation is required.
+
 The table is edited through JavaScript methods. The rendered cells are not directly editable by users.
 
 The class stores the table in its `data` attribute:
@@ -74,6 +76,46 @@ await table.loadUrl("data/example.csv");
 The URL must allow the browser to fetch it. A failed HTTP response causes `loadUrl` to throw an error.
 
 All loading methods return the table instance, so calls can be chained after the returned promise resolves for `loadFile` and `loadUrl`.
+
+## Loading XLS and XLSX Files
+
+Include the SheetJS script before `table.js`:
+
+```html
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="table.js"></script>
+```
+
+Load a local `.xls` or `.xlsx` file with `loadExcel`:
+
+```html
+<input id="excel-file" type="file" accept=".xls,.xlsx">
+```
+
+```js
+document.querySelector("#excel-file").addEventListener("change", async (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+        await table.loadExcel(file);
+    }
+});
+```
+
+The first worksheet is loaded by default. Select a worksheet by name or zero-based index:
+
+```js
+await table.loadExcel(file, { sheet: "Grants" });
+await table.loadExcel(file, { sheet: 1 });
+```
+
+You can also load an Excel file from a URL:
+
+```js
+await table.loadExcelUrl("data/grants.xlsx", { sheet: "Grants" });
+```
+
+SheetJS converts the selected worksheet to CSV inside the class. That CSV is passed to `loadCSV`, so the converted headers and rows become `table.data.headers` and `table.data.rows`, and all existing getters, setters, rendering, and `getData()` behavior continue to work.
 
 ## Reading Data
 

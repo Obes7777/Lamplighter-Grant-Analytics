@@ -58,6 +58,24 @@ class CsvTable {
         return this;
     }
 
+    async loadExcel(file, options = {}) {
+        if (!(file instanceof Blob)) {
+            throw new TypeError("loadExcel expects a File or Blob object.");
+        }
+
+        return this.loadExcelBuffer(await file.arrayBuffer(), options);
+    }
+
+    async loadExcelUrl(url, options = {}) {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`Unable to load Excel file: ${response.status} ${response.statusText}`);
+        }
+
+        return this.loadExcelBuffer(await response.arrayBuffer(), options);
+    }
+
     getRow(rowIndex) {
         return this.data.rows[rowIndex] ? [...this.data.rows[rowIndex]] : null;
     }
@@ -143,6 +161,48 @@ class CsvTable {
 
     toCSV() {
         return this.getData();
+    }
+
+    loadExcelBuffer(buffer, options = {}) {
+        const xlsx = this.getXLSX();
+        const workbook = xlsx.read(buffer, { type: "array" });
+        const sheetName = this.getSheetName(workbook, options.sheet);
+        const worksheet = workbook.Sheets[sheetName];
+        const csv = xlsx.utils.sheet_to_csv(worksheet);
+
+        this.loadCSV(csv);
+        return this;
+    }
+
+    getSheetName(workbook, requestedSheet) {
+        if (workbook.SheetNames.length === 0) {
+            throw new Error("The Excel workbook does not contain any worksheets.");
+        }
+
+        if (requestedSheet === undefined) {
+            return workbook.SheetNames[0];
+        }
+
+        if (Number.isInteger(requestedSheet)) {
+            const sheetName = workbook.SheetNames[requestedSheet];
+            if (sheetName) {
+                return sheetName;
+            }
+        }
+
+        if (typeof requestedSheet === "string" && workbook.SheetNames.includes(requestedSheet)) {
+            return requestedSheet;
+        }
+
+        throw new Error(`Worksheet not found: ${requestedSheet}`);
+    }
+
+    getXLSX() {
+        if (typeof XLSX !== "undefined") {
+            return XLSX;
+        }
+
+        throw new Error("SheetJS is not loaded. Include the SheetJS script before table.js.");
     }
 
     render() {
